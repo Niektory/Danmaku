@@ -11,6 +11,7 @@ from character import CharacterDeck
 from role import RoleDeck
 
 PLAYERS = 4
+SIMPLIFIED = True
 
 class Application(object):
 	def run(self):
@@ -21,7 +22,7 @@ class Application(object):
 		self.incident_deck = IncidentDeck()
 		self.main_deck = MainDeck()
 		self.character_deck = CharacterDeck()
-		self.role_deck = RoleDeck(PLAYERS)
+		self.role_deck = RoleDeck(PLAYERS, SIMPLIFIED)
 
 		# create players and give them roles
 		self.players = []
