@@ -10,7 +10,7 @@ class RoleDeck(Deck):
 		partner_deck = PartnerDeck(players, simplified)
 		stage_boss_deck = StageBossDeck(players, simplified)
 		ex_boss_deck = ExBossDeck(players, simplified)
-		
+
 		self.deck = ["heroine", stage_boss_deck.draw(), stage_boss_deck.draw(), ex_boss_deck.draw()]
 		if players >= 5:
 			self.deck.append(partner_deck.draw())
