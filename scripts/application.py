@@ -49,7 +49,10 @@ class Application(object):
 						raise IndexError()
 					player.character = drawn_characters[int(player_input)]
 				except (IndexError, ValueError):
-					print("Invalid input, enter an integer between 0 and", len(drawn_characters)-1)
+					print(player.name + ": Invalid input, enter an integer between 0 and",
+						len(drawn_characters)-1)
 				else:
 					break
 			print(player.name + ": You got character", player.character)
+		for player in self.players:
+			print("Everyone:", player.name, "has chosen character", player.character)
