@@ -27,11 +27,14 @@ class Application(object):
 
 		# create players and give them roles
 		self.players = []
+		self.heroine = None
 		for i in xrange(PLAYERS):
 			new_player = Player()
 			new_player.name = "Player " + str(i)
 			new_player.role = self.role_deck.draw()
 			self.players.append(new_player)
+			if new_player.role == "heroine":
+				self.heroine = new_player
 			print(new_player.name + ": You got role", new_player.role)
 
 		# assign characters to players
@@ -56,3 +59,6 @@ class Application(object):
 			print(player.name + ": You got character", player.character)
 		for player in self.players:
 			print("Everyone:", player.name, "has chosen character", player.character)
+
+		# reveal the heroine
+		print("Everyone:", self.heroine.name, "is the heroine")
