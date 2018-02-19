@@ -5,4 +5,9 @@ from deck import Deck
 
 class CharacterDeck(Deck):
 	def __init__(self):
-		pass
+		Deck.__init__(self)
+		self.deck = ["Alice", "Cirno", "Reimu", "Byakuren", "Tenshi", "Meiling", "Suika",
+			"Sakuya", "Keine", "Nitori", "Yuuka", "Marisa", "Sanae", "Satori", "Youmu",
+			"Futo", "Patchouli", "Reisen", "Utsuho", "Remilia", "Aya", "Miko", "Eirin",
+			"Yukari", "Player 2"]
+		self.shuffle()

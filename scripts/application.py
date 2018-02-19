@@ -12,6 +12,7 @@ from role import RoleDeck
 
 PLAYERS = 4
 SIMPLIFIED = True
+CHARACTERS_TO_DRAW = 2
 
 class Application(object):
 	def run(self):
@@ -28,6 +29,27 @@ class Application(object):
 		self.players = []
 		for i in xrange(PLAYERS):
 			new_player = Player()
+			new_player.name = "Player " + str(i)
 			new_player.role = self.role_deck.draw()
 			self.players.append(new_player)
-			print("Player", i, "got role", new_player.role)
+			print(new_player.name + ": You got role", new_player.role)
+
+		# assign characters to players
+		for player in self.players:
+			drawn_characters = []
+			for i in xrange(CHARACTERS_TO_DRAW):
+				drawn_characters.append(self.character_deck.draw())
+			print(player.name + ": Choose a character")
+			for i,character in enumerate(drawn_characters):
+				print("[" + str(i) + "]", character)
+			while True:
+				player_input = raw_input()
+				try:
+					if int(player_input) < 0:
+						raise IndexError()
+					player.character = drawn_characters[int(player_input)]
+				except (IndexError, ValueError):
+					print("Invalid input, enter an integer between 0 and", len(drawn_characters)-1)
+				else:
+					break
+			print(player.name + ": You got character", player.character)
