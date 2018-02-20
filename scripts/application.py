@@ -20,6 +20,10 @@ class Application(object):
 	def current_player(self):
 		return self.players[self.current_player_i]
 
+	@property
+	def active_players(self):
+		return [player for player in self.players if not player.defeated]
+
 	def distance(self, player1, player2):
 		i = player1
 		dist1 = 0
@@ -154,7 +158,7 @@ class Application(object):
 			print("Everyone:", self.current_player.name, "ends turn")
 
 			print("Everyone: Discard Step")
-			for player in self.players:
+			for player in self.active_players:
 				while len(player.hand) > player.max_hand_size:
 					print(player.name + ": Your hand:")
 					for i,card in enumerate(player.hand):
@@ -173,4 +177,7 @@ class Application(object):
 						player.hand.remove(discarded_card)
 						self.discard_pile.deck.append(discarded_card)
 
-			self.current_player_i = (self.current_player_i + 1) % len(self.players)
+			while True:
+				self.current_player_i = (self.current_player_i + 1) % len(self.players)
+				if not self.current_player.defeated:
+					break
