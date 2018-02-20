@@ -15,12 +15,17 @@ SIMPLIFIED = True
 CHARACTERS_TO_DRAW = 2
 
 class Application(object):
+	@property
+	def current_player(self):
+		return self.players[self.current_player_i]
+
 	def run(self):
 		print("Welcome to", version.game_name, version.version, "!")
 
-		print("Preparing the game...")
+		print("*** Preparing the game ***")
 		# prepare the decks
 		self.incident_deck = IncidentDeck()
+		self.incident = None
 		self.main_deck = MainDeck()
 		self.character_deck = CharacterDeck()
 		self.role_deck = RoleDeck(PLAYERS, SIMPLIFIED)
@@ -28,6 +33,7 @@ class Application(object):
 		# create players and give them roles
 		self.players = []
 		self.heroine = None
+		self.current_player_i = 0
 		for i in xrange(PLAYERS):
 			new_player = Player()
 			new_player.name = "Player " + str(i)
@@ -35,6 +41,7 @@ class Application(object):
 			self.players.append(new_player)
 			if new_player.role == "heroine":
 				self.heroine = new_player
+				self.current_player_i = i
 			print(new_player.name + ": You got role", new_player.role)
 
 		# assign characters to players
@@ -85,3 +92,64 @@ class Application(object):
 				player.hand.append(self.main_deck.draw())
 			print("Everyone:", player.name, "draws", player.max_hand_size, "cards")
 			print(player.name + ": Your hand:", player.hand)
+
+		print("*** Starting the game ***")
+		while True:
+			# play a turn
+			print("Everyone: It's", self.current_player.name + "'s turn")
+
+			print("Everyone: Incident Step")
+			if not self.incident:
+				self.incident = self.incident_deck.draw()
+				print("Everyone:", self.incident, "was put into play")
+
+			print("Everyone: Draw Step")
+			for i in xrange(2):
+				drawn_card = self.main_deck.draw()
+				self.current_player.hand.append(drawn_card)
+				print(self.current_player.name + ": You drew", drawn_card)
+			print("Everyone:", self.current_player.name, "draws 2 cards")
+
+			print("Everyone: Main Step")
+			while len(self.current_player.hand) > 0:
+				print(self.current_player.name + ": Your hand:")
+				for i,card in enumerate(self.current_player.hand):
+					print("[" + str(i) + "]", card)
+				print(self.current_player.name
+					+ ": Choose a card to play, or press [Enter] to end turn")
+				player_input = raw_input()
+				if player_input == "":
+					break
+				try:
+					if int(player_input) < 0:
+						raise IndexError()
+					played_card = self.current_player.hand[int(player_input)]
+				except (IndexError, ValueError):
+					print(self.current_player.name
+						+ ": Invalid input, enter an integer between 0 and",
+						len(self.current_player.hand)-1)
+				else:
+					print("Everyone:", self.current_player.name, "plays", played_card)
+					self.current_player.hand.remove(played_card)
+			print("Everyone:", self.current_player.name, "ends turn")
+
+			print("Everyone: Discard Step")
+			for player in self.players:
+				while len(player.hand) > player.max_hand_size:
+					print(player.name + ": Your hand:")
+					for i,card in enumerate(player.hand):
+						print("[" + str(i) + "]", card)
+					print(player.name + ": Choose a card to discard")
+					player_input = raw_input()
+					try:
+						if int(player_input) < 0:
+							raise IndexError()
+						discarded_card = player.hand[int(player_input)]
+					except (IndexError, ValueError):
+						print(player.name + ": Invalid input, enter an integer between 0 and",
+							len(player.hand)-1)
+					else:
+						print("Everyone:", player.name, "discards", discarded_card)
+						player.hand.remove(discarded_card)
+
+			self.current_player_i = (self.current_player_i + 1) % len(self.players)
