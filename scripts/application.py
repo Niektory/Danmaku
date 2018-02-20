@@ -20,6 +20,23 @@ class Application(object):
 	def current_player(self):
 		return self.players[self.current_player_i]
 
+	def distance(self, player1, player2):
+		i = player1
+		dist1 = 0
+		while i % len(self.players) != player2:
+			i += 1
+			if not self.players[i % len(self.players)].defeated:
+				dist1 += 1
+
+		i = player2
+		dist2 = 0
+		while i % len(self.players) != player1:
+			i += 1
+			if not self.players[i % len(self.players)].defeated:
+				dist2 += 1
+
+		return min(dist1, dist2)
+
 	def run(self):
 		print("Welcome to", version.game_name, version.version, "!")
 

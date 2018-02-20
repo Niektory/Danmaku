@@ -10,3 +10,4 @@ class Player(object):
 		self.life = self.max_life
 		self.max_hand_size = 4
 		self.hand = []
+		self.defeated = False
