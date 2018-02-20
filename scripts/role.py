@@ -5,7 +5,7 @@ from deck import Deck
 
 class RoleDeck(Deck):
 	def __init__(self, players, simplified=False):
-		Deck.__init__(self)
+		Deck.__init__(self, "Role Deck")
 
 		partner_deck = PartnerDeck(players, simplified)
 		stage_boss_deck = StageBossDeck(players, simplified)
@@ -26,7 +26,7 @@ class RoleDeck(Deck):
 
 class PartnerDeck(Deck):
 	def __init__(self, players, simplified=False):
-		Deck.__init__(self)
+		Deck.__init__(self, "Partner role cards")
 
 		self.deck = []
 		if players >= 5:
@@ -41,7 +41,7 @@ class PartnerDeck(Deck):
 
 class StageBossDeck(Deck):
 	def __init__(self, players, simplified=False):
-		Deck.__init__(self)
+		Deck.__init__(self, "Stage Boss role cards")
 
 		self.deck = ["stage boss", "stage boss", "stage boss"]
 		if players >= 5 and not simplified:
@@ -52,7 +52,7 @@ class StageBossDeck(Deck):
 
 class ExBossDeck(Deck):
 	def __init__(self, players, simplified=False):
-		Deck.__init__(self)
+		Deck.__init__(self, "Extra Boss role cards")
 
 		self.deck = ["ex boss"]
 		if not simplified:

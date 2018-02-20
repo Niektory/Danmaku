@@ -5,7 +5,7 @@ from deck import Deck
 
 class IncidentDeck(Deck):
 	def __init__(self):
-		Deck.__init__(self)
+		Deck.__init__(self, "Incident Deck")
 		self.deck = ["crisis of faith", "crossing to Higan", "endless party", "eternal night",
 			"five impossible requests", "great barrier weakening", "great fairy wars",
 			"Lily White", "overdrive", "rekindle blazing hell", "Saigyou Ayakashi blooming",

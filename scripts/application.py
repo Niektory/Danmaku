@@ -5,6 +5,7 @@ from __future__ import print_function
 
 from config import version
 from player import Player
+from deck import Deck
 from incident import IncidentDeck
 from maindeck import MainDeck
 from character import CharacterDeck
@@ -26,7 +27,8 @@ class Application(object):
 		# prepare the decks
 		self.incident_deck = IncidentDeck()
 		self.incident = None
-		self.main_deck = MainDeck()
+		self.discard_pile = Deck("discard pile")
+		self.main_deck = MainDeck(self.discard_pile)
 		self.character_deck = CharacterDeck()
 		self.role_deck = RoleDeck(PLAYERS, SIMPLIFIED)
 
@@ -131,6 +133,7 @@ class Application(object):
 				else:
 					print("Everyone:", self.current_player.name, "plays", played_card)
 					self.current_player.hand.remove(played_card)
+					self.discard_pile.deck.append(played_card)
 			print("Everyone:", self.current_player.name, "ends turn")
 
 			print("Everyone: Discard Step")
@@ -151,5 +154,6 @@ class Application(object):
 					else:
 						print("Everyone:", player.name, "discards", discarded_card)
 						player.hand.remove(discarded_card)
+						self.discard_pile.deck.append(discarded_card)
 
 			self.current_player_i = (self.current_player_i + 1) % len(self.players)
