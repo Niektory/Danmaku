@@ -70,4 +70,18 @@ class Application(object):
 			else:
 				player.max_life = 4
 			player.life = player.max_life
-			print("Everyone:", player.name, "has", player.life, "life")
+			print("Everyone:", player.name, "has", player.life, "life and max life")
+
+		# set max hand size of all players and draw their hands
+		for player in self.players:
+			if player.role == "heroine":
+				player.max_hand_size = 5
+			else:
+				player.max_hand_size = 4
+			if player.character == "Patchouli":
+				player.max_hand_size += 3
+			print("Everyone:", player.name, "has", player.max_hand_size, "max hand size")
+			for i in xrange(player.max_hand_size):
+				player.hand.append(self.main_deck.draw())
+			print("Everyone:", player.name, "draws", player.max_hand_size, "cards")
+			print(player.name + ": Your hand:", player.hand)

@@ -8,4 +8,5 @@ class Player(object):
 		self.character = "fairy"
 		self.max_life = 4
 		self.life = self.max_life
+		self.max_hand_size = 4
 		self.hand = []
