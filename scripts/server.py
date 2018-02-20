@@ -14,7 +14,7 @@ class Server(object):
 		with ServerConnections() as connections:
 			while True:
 				connections.accept()
-				connections.getMessages()
+				connections.processMessages()
 				if connections.active >= 4:
 					#gameplay
 					pass
