@@ -6,5 +6,6 @@ class Player(object):
 		self.name = "anon"
 		self.role = "loser"
 		self.character = "fairy"
-		self.life = 0
+		self.max_life = 4
+		self.life = self.max_life
 		self.hand = []

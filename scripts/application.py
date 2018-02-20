@@ -62,3 +62,12 @@ class Application(object):
 
 		# reveal the heroine
 		print("Everyone:", self.heroine.name, "is the heroine")
+
+		# set starting life and max life of all players
+		for player in self.players:
+			if player.role == "heroine":
+				player.max_life = 5
+			else:
+				player.max_life = 4
+			player.life = player.max_life
+			print("Everyone:", player.name, "has", player.life, "life")
