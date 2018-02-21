@@ -46,7 +46,7 @@ class ServerConnections(object):
 			message = connection.read()
 			if not message:
 				continue
-			# login
+			# login as user
 			if message.startswith("user:") and message.count(":") >= 2 and message.split(":")[1]:
 				self.login(message.split(":")[1], message.split(":",2)[2], connection)
 			# list users
