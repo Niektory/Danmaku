@@ -17,7 +17,7 @@ class Client(object):
 				time.sleep(0.05)
 				while connection.connection.read():
 					pass
-				message = raw_input()
+				message = raw_input("> ")
 				while connection.connection.read():
 					pass
 				if message == "quit":

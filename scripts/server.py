@@ -18,6 +18,3 @@ class Server(object):
 				connections.accept()
 				connections.broadcast()
 				message = connections.read()
-				if connections.active >= 4:
-					#gameplay
-					pass

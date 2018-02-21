@@ -36,26 +36,35 @@ class ServerConnections(object):
 			if user.connection.closed:
 				user.connection = None
 
-	@property
-	def active(self):
-		return len(self.connections)
+	def findUser(self, to_find):
+		for user in self.users:
+			if to_find in (user.name, user.connection):
+				return user
 
 	def read(self):
 		for connection in self.connections:
 			message = connection.read()
 			if not message:
 				continue
+			# login
 			if message.startswith("user:") and message.count(":") >= 2:
 				self.login(message.split(":")[1], message.split(":",2)[2], connection)
+			# list users
 			elif message == "users":
 				for user in self.users:
 					if user.connection:
 						connection.send("{} : {}".format(user.name, user.connection.address))
 					else:
 						connection.send("{} : not connected".format(user.name))
+			# list connections
 			elif message == "connections":
 				for i_connection in self.connections:
 					connection.send(i_connection.address)
+			# broadcast to all users
+			elif self.findUser(connection) and message.startswith("say:"):
+				self.broadcast("{} says: {}"
+					.format(self.findUser(connection).name,message.split(":",1)[1]))
+			# unhandled message
 			else:
 				return message
 
@@ -129,7 +138,7 @@ class Connection(object):
 				self.close()
 			else:
 				if data:
-					print("Received data:", data)
+					#print("Received data:", data)
 					self.read_buffer += data
 				else:
 					self.close()
@@ -149,8 +158,7 @@ class Connection(object):
 		# return a single message
 		message, self.read_buffer \
 			= self.read_buffer[3:3+message_length], self.read_buffer[3+message_length:]
-		print("Message is {}".format(message))
-		#self.send(message)	#echo
+		print("Received message: {}".format(message))
 		return message
 
 	def send(self, message=""):
