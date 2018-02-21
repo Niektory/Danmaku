@@ -64,6 +64,7 @@ class Connection(object):
 		self.closed = False
 
 	def read(self):
+		# read from the socket and add data to the buffer
 		if not self.closed and select.select([self.socket], [], [], 0)[0]:
 			try:
 				data = self.socket.recv(BUFFER_SIZE)
@@ -77,12 +78,19 @@ class Connection(object):
 				else:
 					self.close()
 
+		# check if we got a complete message
 		if len(self.read_buffer) < 3:
 			return
-		message_length = int(self.read_buffer[:3])
+		try:
+			message_length = int(self.read_buffer[:3])
+		except ValueError:
+			print("Error: Malformed message")
+			self.close()
+			return
 		if len(self.read_buffer) < 3 + message_length:
 			return
 
+		# return a single message
 		message, self.read_buffer \
 			= self.read_buffer[3:3+message_length], self.read_buffer[3+message_length:]
 		print("Message is {}".format(message))
@@ -90,8 +98,14 @@ class Connection(object):
 		return message
 
 	def send(self, message=""):
+		# add message to the buffer
 		if message:
-			self.send_buffer += str(len(message)).zfill(3) + message
+			if len(message) > 999:
+				print("Error: Message too long")
+			else:
+				self.send_buffer += str(len(message)).zfill(3) + message
+
+		# attempt sending the buffer
 		if not self.closed and self.send_buffer \
 				and select.select([], [self.socket], [], 0)[1]:
 			try:
