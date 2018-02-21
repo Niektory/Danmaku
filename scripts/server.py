@@ -12,9 +12,14 @@ class Server(object):
 	def run(self):
 		print("Welcome to {} {} server!".format(version.game_name, version.version))
 		with ServerConnections() as connections:
-			while True:
+			message = None
+			while message != "shutdown":
+				connections.prune()
 				connections.accept()
-				connections.processMessages()
+				connections.broadcast()
+				message = connections.read()
+				if message == "connections":
+					connections.broadcast(connections.active)
 				if connections.active >= 4:
 					#gameplay
 					pass

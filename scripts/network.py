@@ -25,16 +25,22 @@ class ServerConnections(object):
 			print("Connection address:", address)
 			self.connections.append(Connection(connection, address))
 
+	def prune(self):
+		for connection in self.connections[:]:
+			if connection.closed:
+				self.connections.remove(connection)
+
 	@property
 	def active(self):
 		return len(self.connections)
 
-	def processMessages(self):
+	def read(self):
 		for connection in self.connections:
-			connection.read()
-			connection.send()
+			message = connection.read()
+			if message:
+				return message
 
-	def broadcast(self, message):
+	def broadcast(self, message=""):
 		for connection in self.connections:
 			connection.send(message)
 
@@ -100,10 +106,10 @@ class Connection(object):
 	def send(self, message=""):
 		# add message to the buffer
 		if message:
-			if len(message) > 999:
+			if len(str(message)) > 999:
 				print("Error: Message too long")
 			else:
-				self.send_buffer += str(len(message)).zfill(3) + message
+				self.send_buffer += str(len(str(message))).zfill(3) + str(message)
 
 		# attempt sending the buffer
 		if not self.closed and self.send_buffer \
