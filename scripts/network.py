@@ -6,9 +6,9 @@ from __future__ import print_function
 import socket
 import select
 
+IP = "127.0.0.1"
 PORT = 12347
 BUFFER_SIZE = 4096
-MESSAGE_LENGTH = 20
 
 class ServerConnections(object):
 	def __enter__(self):
@@ -41,8 +41,18 @@ class ServerConnections(object):
 	def __exit__(self, exc_type, exc_value, traceback):
 		for connection in self.connections:
 			connection.close()
-		self.server_socket.shutdown(socket.SHUT_RDWR)
 		self.server_socket.close()
+
+
+class ClientConnection(object):
+	def __enter__(self):
+		client_socket = socket.socket()
+		client_socket.connect((IP, PORT))
+		self.connection = Connection(client_socket, (IP, PORT))
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		self.connection.close()
 
 
 class Connection(object):
@@ -55,35 +65,49 @@ class Connection(object):
 
 	def read(self):
 		if not self.closed and select.select([self.socket], [], [], 0)[0]:
-			data = self.socket.recv(BUFFER_SIZE)
-			if data:
-				print("Received data:", data)
-				self.send(data)	#echo
-				self.read_buffer += data
-			else:
+			try:
+				data = self.socket.recv(BUFFER_SIZE)
+			except socket.error as msg:
+				print("Socket error: {}".format(msg))
 				self.close()
+			else:
+				if data:
+					print("Received data:", data)
+					self.read_buffer += data
+				else:
+					self.close()
 
-		if len(self.read_buffer) < MESSAGE_LENGTH:
+		if len(self.read_buffer) < 3:
 			return
+		message_length = int(self.read_buffer[:3])
+		if len(self.read_buffer) < 3 + message_length:
+			return
+
 		message, self.read_buffer \
-			= self.read_buffer[:MESSAGE_LENGTH], self.read_buffer[MESSAGE_LENGTH:]
+			= self.read_buffer[3:3+message_length], self.read_buffer[3+message_length:]
 		print("Message is {}".format(message))
+		#self.send(message)	#echo
 		return message
 
 	def send(self, message=""):
-		self.send_buffer += message
+		if message:
+			self.send_buffer += str(len(message)).zfill(3) + message
 		if not self.closed and self.send_buffer \
 				and select.select([], [self.socket], [], 0)[1]:
-			characters_sent = self.socket.send(self.send_buffer)
-			if characters_sent:
-				self.send_buffer = self.send_buffer[characters_sent:]
-			else:
+			try:
+				characters_sent = self.socket.send(self.send_buffer)
+			except socket.error as msg:
+				print("Socket error: {}".format(msg))
 				self.close()
+			else:
+				if characters_sent:
+					self.send_buffer = self.send_buffer[characters_sent:]
+				else:
+					self.close()
 
 	def close(self):
 		if self.closed:
 			return
-		self.socket.shutdown(socket.SHUT_RDWR)
 		self.socket.close()
 		self.closed = True
 		print("{} disconnected".format(self.address))

@@ -5,17 +5,16 @@ from __future__ import print_function
 
 import socket
 
-IP = "127.0.0.1"
-PORT = 12346
-BUFFER_SIZE = 1024
-MESSAGE = "Hello, World!"
+from config import version
+from network import ClientConnection
 
 class Client(object):
 	def run(self):
-		s = socket.socket()
-		s.connect((IP, PORT))
-		s.send(MESSAGE)
-		data = s.recv(BUFFER_SIZE)
-		s.close()
-
-		print("received data:", data)
+		print("Welcome to {} {} client!".format(version.game_name, version.version))
+		with ClientConnection() as connection:
+			while not connection.connection.closed:
+				message = raw_input()
+				connection.connection.read()
+				if not message:
+					return
+				connection.connection.send(message)
