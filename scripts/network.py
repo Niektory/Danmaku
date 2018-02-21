@@ -47,7 +47,7 @@ class ServerConnections(object):
 			if not message:
 				continue
 			# login
-			if message.startswith("user:") and message.count(":") >= 2:
+			if message.startswith("user:") and message.count(":") >= 2 and message.split(":")[1]:
 				self.login(message.split(":")[1], message.split(":",2)[2], connection)
 			# list users
 			elif message == "users":
@@ -63,10 +63,12 @@ class ServerConnections(object):
 			# broadcast to all users
 			elif self.findUser(connection) and message.startswith("say:"):
 				self.broadcast("{} says: {}"
-					.format(self.findUser(connection).name,message.split(":",1)[1]))
+					.format(self.findUser(connection).name, message.split(":",1)[1]))
 			# unhandled message
-			else:
-				return message
+			elif self.findUser(connection):
+				return self.findUser(connection).name, message
+		# no messages
+		return None, None
 
 	def login(self, name, password, connection):
 		# if already logged in, log out first
@@ -91,6 +93,9 @@ class ServerConnections(object):
 		self.users.append(User(name, password, connection))
 		print("{} logged in as {}".format(connection.address, name))
 		connection.send("Logged in as {}".format(name))
+
+	def message(self, user, message=""):
+		self.findUser(user).connection.send(message)
 
 	def broadcast(self, message=""):
 		for connection in self.connections:

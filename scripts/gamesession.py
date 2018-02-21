@@ -3,7 +3,6 @@
 
 from __future__ import print_function
 
-from config import version
 from player import Player
 from deck import Deck
 from incident import IncidentDeck
@@ -15,7 +14,22 @@ PLAYERS = 4
 SIMPLIFIED = True
 CHARACTERS_TO_DRAW = 2
 
-class Application(object):
+class GameSession(object):
+	def __init__(self):
+		self.state = ["waiting for players"]
+		self.players = []
+
+	def addPlayer(self, name):
+		if not self.findPlayer(name):
+			self.players.append(Player(name))
+			return True
+		return False
+
+	def findPlayer(self, to_find):
+		for player in self.players:
+			if to_find == player.name:
+				return player
+
 	@property
 	def current_player(self):
 		return self.players[self.current_player_i]
