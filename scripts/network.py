@@ -13,6 +13,7 @@ BUFFER_SIZE = 4096
 class ServerConnections(object):
 	def __enter__(self):
 		self.connections = []
+		self.users = []
 		self.server_socket = socket.socket()
 		self.server_socket.bind(("", PORT))
 		self.server_socket.listen(5)
@@ -29,6 +30,11 @@ class ServerConnections(object):
 		for connection in self.connections[:]:
 			if connection.closed:
 				self.connections.remove(connection)
+		for user in self.users:
+			if not user.connection:
+				continue
+			if user.connection.closed:
+				user.connection = None
 
 	@property
 	def active(self):
@@ -37,8 +43,45 @@ class ServerConnections(object):
 	def read(self):
 		for connection in self.connections:
 			message = connection.read()
-			if message:
+			if not message:
+				continue
+			if message.startswith("user:") and message.count(":") >= 2:
+				self.login(message.split(":")[1], message.split(":",2)[2], connection)
+			elif message == "users":
+				for user in self.users:
+					if user.connection:
+						connection.send("{} : {}".format(user.name, user.connection.address))
+					else:
+						connection.send("{} : not connected".format(user.name))
+			elif message == "connections":
+				for i_connection in self.connections:
+					connection.send(i_connection.address)
+			else:
 				return message
+
+	def login(self, name, password, connection):
+		# if already logged in, log out first
+		for user in self.users:
+			if connection == user.connection:
+				user.connection = None
+
+		# if an user already exists check if password matches
+		for user in self.users:
+			if name == user.name:
+				if password == user.password:
+					user.connection = connection
+					print("{} logged in as {}".format(connection.address, name))
+					connection.send("Logged in as {}".format(name))
+				else:
+					print("{} failed to log in as {}: wrong password"
+						.format(connection.address, name))
+					connection.send("Failed to log in: wrong password")
+				return
+
+		# no user with this name: create a new user
+		self.users.append(User(name, password, connection))
+		print("{} logged in as {}".format(connection.address, name))
+		connection.send("Logged in as {}".format(name))
 
 	def broadcast(self, message=""):
 		for connection in self.connections:
@@ -48,6 +91,13 @@ class ServerConnections(object):
 		for connection in self.connections:
 			connection.close()
 		self.server_socket.close()
+
+
+class User(object):
+	def __init__(self, name, password, connection):
+		self.name = name
+		self.password = password
+		self.connection = connection
 
 
 class ClientConnection(object):
