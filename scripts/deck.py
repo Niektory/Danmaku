@@ -12,7 +12,6 @@ class Deck(object):
 
 	def shuffle(self):
 		random.shuffle(self.deck)
-		print("Everyone:", self.name, "was shuffled")
 
 	def draw(self):
 		return self.deck.pop()
