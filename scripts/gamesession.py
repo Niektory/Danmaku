@@ -9,7 +9,7 @@ import gamestate
 class GameSession(object):
 	def __init__(self):
 		self.state = [gamestate.PlayTurns(self), gamestate.DealHands(self),
-			gamestate.InitLife(self), gamestate.RevealHeroine(self),
+			gamestate.RevealHeroine(self),
 			gamestate.DealCharacters(self), gamestate.DealRoles(self),
 			gamestate.InitDecks(self), gamestate.PreGame(self)]
 		self.history = []

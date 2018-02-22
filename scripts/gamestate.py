@@ -95,17 +95,6 @@ class RevealHeroine(GameState):
 		self.session.history.append(self.session.heroine.name)
 		self.session.state.pop()
 
-# set starting life of all players
-class InitLife(GameState):
-	def run(self):
-		for player in self.session.players:
-			if player.role == "heroine":
-				player.max_life = 5
-			else:
-				player.max_life = 4
-			player.life = player.max_life
-			print("Everyone:", player.name, "has", player.life, "life and max life")
-
 # deal hands to all players
 class DealHands(GameState):
 	def run(self):

@@ -11,7 +11,8 @@ class RoleDeck(Deck):
 		stage_boss_deck = StageBossDeck(players, simplified)
 		ex_boss_deck = ExBossDeck(players, simplified)
 
-		self.deck = ["heroine", stage_boss_deck.draw(), stage_boss_deck.draw(), ex_boss_deck.draw()]
+		self.deck = \
+			[stage_boss_deck.draw(), stage_boss_deck.draw(), ex_boss_deck.draw(), "heroine"]
 		if players >= 5:
 			self.deck.append(partner_deck.draw())
 		if players >= 6:
@@ -21,7 +22,7 @@ class RoleDeck(Deck):
 		if players == 8:
 			self.deck.append("rival")
 
-		self.shuffle()
+		#self.shuffle()	# commented for testing
 
 
 class PartnerDeck(Deck):
