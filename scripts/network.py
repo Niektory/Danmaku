@@ -68,7 +68,7 @@ class ServerConnections(object):
 			elif self.findUser(connection):
 				return self.findUser(connection).name, message
 		# no messages
-		return None, None
+		return "", ""
 
 	def login(self, name, password, connection):
 		# if already logged in, log out first

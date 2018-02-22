@@ -27,7 +27,7 @@ class Server(object):
 					for player in game_session.players:
 						connections.message(user, player.name)
 				# join the game as player
-				if message == "join":
+				elif message == "join":
 					if game_session.addPlayer(user):
 						connections.broadcast("{} joined the game".format(user))
 				# start the game with the players that joined so far
@@ -35,6 +35,9 @@ class Server(object):
 					if game_session.start():
 						connections.broadcast("Starting a {}-player game"
 							.format(len(game_session.players)))
+				# perform a game action
+				elif message.startswith("act:"):
+					game_session.playerInput(user, message.split(":",1)[1])
 
 				game_session.run()
 				while history_processed < len(game_session.history):

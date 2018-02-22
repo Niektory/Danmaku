@@ -53,18 +53,40 @@ class DealRoles(GameState):
 				self.session.current_player_i = i
 			self.session.history.append(player.role)
 
-# assign characters to all players
+# deal characters to all players
 class DealCharacters(GameState):
 	def run(self):
 		self.session.state.pop()
 		self.session.history.append("deal characters")
 		self.session.history.append(CHARACTERS_TO_DRAW)
+		dealt_characters = {}
 		for i, player in enumerate(self.session.players):
 			drawn_characters = []
 			for j in xrange(CHARACTERS_TO_DRAW):
 				drawn_characters.append(self.session.character_deck.draw())
+			dealt_characters[player.name] = drawn_characters
 			self.session.history.append(drawn_characters)
-		# WIP
+		state_choose = ChooseCharacters(self.session)
+		state_choose.init(dealt_characters)
+		self.session.state.append(state_choose)
+
+# all players need to choose their characters
+class ChooseCharacters(GameState):
+	def init(self, dealt_characters):
+		self.dealt_characters = dealt_characters
+
+	def run(self):
+		for player in self.session.players:
+			if not player.character:
+				return
+		self.session.state.pop()
+		self.session.history.append("choose characters")
+		for player in self.session.players:
+			self.session.history.append(player.character)
+
+	def playerInput(self, name, message):
+		if message in self.dealt_characters[name]:
+			self.session.findPlayer(name).character = message
 
 # reveal the heroine to all players
 class RevealHeroine(GameState):
