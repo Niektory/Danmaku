@@ -8,7 +8,7 @@ class Player(object):
 		self.name = name
 		self.role = None
 		self.character = None
-		self.life_lost = 0
+		self.life = DEFAULT_LIFE
 		self.max_hand_size = 4
 		self.hand = []
 		self.defeated = False
@@ -16,11 +16,3 @@ class Player(object):
 	@property
 	def max_life(self):
 		return DEFAULT_LIFE
-
-	@property
-	def life(self):
-		return self.max_life - self.life_lost
-
-	@life.setter
-	def life(self, value):
-		self.life_lost = self.max_life - value
