@@ -117,21 +117,37 @@ class DealHands(GameState):
 # play the turns
 class PlayTurns(GameState):
 	def run(self):
-		print("Everyone: It's", self.session.current_player.name + "'s turn")
+		self.session.history.append("play turn")
+		self.session.history.append(self.session.current_player_i)
+		self.session.state.extend((DiscardStep(self.session), MainStep(self.session),
+			DrawStep(self.session), IncidentStep(self.session)))
 
-		print("Everyone: Incident Step")
+# turn: incident step
+class IncidentStep(GameState):
+	def run(self):
+		self.session.history.append("incident step")
 		if not self.session.incident:
-			self.session.incident = self.incident_deck.draw()
-			print("Everyone:", self.session.incident, "was put into play")
+			self.session.incident = self.session.incident_deck.draw()
+			self.session.history.append(self.session.incident)
+		else:
+			self.session.history.append("no incident drawn")
+		self.session.state.pop()
 
-		print("Everyone: Draw Step")
+# turn: draw step
+class DrawStep(GameState):
+	def run(self):
+		self.session.history.append("draw step")
+		drawn_cards = []
 		for i in xrange(2):
-			drawn_card = self.session.main_deck.draw()
-			self.session.current_player.hand.append(drawn_card)
-			print(self.session.current_player.name + ": You drew", drawn_card)
-		print("Everyone:", self.session.current_player.name, "draws 2 cards")
+			drawn_cards.append(self.session.main_deck.draw())
+		self.session.current_player.hand.extend(drawn_cards)
+		self.session.history.append(drawn_cards)
+		self.session.state.pop()
 
-		print("Everyone: Main Step")
+# turn: main step
+class MainStep(GameState):
+	def run(self):
+		self.session.history.append("main step")
 		while len(self.session.current_player.hand) > 0:
 			print(self.session.current_player.name + ": Your hand:")
 			for i,card in enumerate(self.session.current_player.hand):
@@ -155,7 +171,10 @@ class PlayTurns(GameState):
 				self.session.discard_pile.deck.append(played_card)
 		print("Everyone:", self.session.current_player.name, "ends turn")
 
-		print("Everyone: Discard Step")
+# turn: discard step
+class DiscardStep(GameState):
+	def run(self):
+		self.session.history.append("discard step")
 		for player in self.session.active_players:
 			while len(player.hand) > player.max_hand_size:
 				print(player.name + ": Your hand:")
