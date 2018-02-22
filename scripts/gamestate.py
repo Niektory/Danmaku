@@ -16,6 +16,9 @@ class GameState(object):
 	def __init__(self, session):
 		self.session = session
 
+	def run(self):
+		pass
+
 	def playerInput(self, name, message):
 		pass
 
@@ -119,8 +122,15 @@ class PlayTurns(GameState):
 	def run(self):
 		self.session.history.append("play turn")
 		self.session.history.append(self.session.current_player_i)
-		self.session.state.extend((DiscardStep(self.session), MainStep(self.session),
-			DrawStep(self.session), IncidentStep(self.session)))
+		self.session.state.extend((
+			EndTurn(self.session),
+			DiscardStep(self.session),
+			PreDiscardStep(self.session),
+			MainStep(self.session),
+			PreMainStep(self.session),
+			DrawStep(self.session),
+			IncidentStep(self.session)
+		))
 
 # turn: incident step
 class IncidentStep(GameState):
@@ -144,56 +154,53 @@ class DrawStep(GameState):
 		self.session.history.append(drawn_cards)
 		self.session.state.pop()
 
-# turn: main step
-class MainStep(GameState):
+# turn: before main step
+class PreMainStep(GameState):
 	def run(self):
 		self.session.history.append("main step")
-		while len(self.session.current_player.hand) > 0:
-			print(self.session.current_player.name + ": Your hand:")
-			for i,card in enumerate(self.session.current_player.hand):
-				print("[" + str(i) + "]", card)
-			print(self.session.current_player.name
-				+ ": Choose a card to play, or press [Enter] to end turn")
-			player_input = raw_input()
-			if player_input == "":
-				break
-			try:
-				if int(player_input) < 0:
-					raise IndexError()
-				played_card = self.session.current_player.hand[int(player_input)]
-			except (IndexError, ValueError):
-				print(self.session.current_player.name
-					+ ": Invalid input, enter an integer between 0 and",
-					len(self.session.current_player.hand)-1)
-			else:
-				print("Everyone:", self.session.current_player.name, "plays", played_card)
-				self.session.current_player.hand.remove(played_card)
-				self.session.discard_pile.deck.append(played_card)
-		print("Everyone:", self.session.current_player.name, "ends turn")
+		self.session.state.pop()
+
+# turn: main step
+class MainStep(GameState):
+	def playerInput(self, name, message):
+		if name != self.session.current_player.name:
+			return
+		if message in self.session.current_player.hand:
+			self.session.history.append(message)
+			self.session.current_player.hand.remove(message)
+			self.session.discard_pile.deck.append(message)
+		elif message == "pass":
+			self.session.history.append(message)
+			self.session.state.pop()
+
+# turn: before discard step
+class PreDiscardStep(GameState):
+	def run(self):
+		self.session.history.append("discard step")
+		self.session.state.pop()
 
 # turn: discard step
 class DiscardStep(GameState):
 	def run(self):
-		self.session.history.append("discard step")
 		for player in self.session.active_players:
-			while len(player.hand) > player.max_hand_size:
-				print(player.name + ": Your hand:")
-				for i,card in enumerate(player.hand):
-					print("[" + str(i) + "]", card)
-				print(player.name + ": Choose a card to discard")
-				player_input = raw_input()
-				try:
-					if int(player_input) < 0:
-						raise IndexError()
-					discarded_card = player.hand[int(player_input)]
-				except (IndexError, ValueError):
-					print(player.name + ": Invalid input, enter an integer between 0 and",
-						len(player.hand)-1)
-				else:
-					print("Everyone:", player.name, "discards", discarded_card)
-					player.hand.remove(discarded_card)
-					self.session.discard_pile.deck.append(discarded_card)
+			if len(player.hand) > player.max_hand_size:
+				return
+		self.session.state.pop()
 
+	def playerInput(self, name, message):
+		player = self.session.findPlayer(name)
+		if len(player.hand) <= player.max_hand_size:
+			return
+		if message in player.hand:
+			self.session.history.append((name, message))
+			player.hand.remove(message)
+			self.session.discard_pile.deck.append(message)
+
+# turn: end turn
+class EndTurn(GameState):
+	def run(self):
+		self.session.history.append("end turn")
+		self.session.state.pop()
 		while True:
 			self.session.current_player_i \
 				= (self.session.current_player_i + 1) % len(self.session.players)
