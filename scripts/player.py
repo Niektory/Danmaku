@@ -2,6 +2,7 @@
 # Copyright 2018 Tomasz "Niektóry" Turowski
 
 DEFAULT_LIFE = 4
+DEFAULT_HAND_SIZE = 4
 
 class Player(object):
 	def __init__(self, name):
@@ -9,10 +10,13 @@ class Player(object):
 		self.role = None
 		self.character = None
 		self.life = DEFAULT_LIFE
-		self.max_hand_size = 4
 		self.hand = []
 		self.defeated = False
 
 	@property
 	def max_life(self):
 		return DEFAULT_LIFE
+
+	@property
+	def max_hand_size(self):
+		return DEFAULT_HAND_SIZE

@@ -107,18 +107,12 @@ class InitLife(GameState):
 # deal hands to all players
 class DealHands(GameState):
 	def run(self):
+		self.session.history.append("deal hands")
+		self.session.state.pop()
 		for player in self.session.players:
-			if player.role == "heroine":
-				player.max_hand_size = 5
-			else:
-				player.max_hand_size = 4
-			if player.character == "Patchouli":
-				player.max_hand_size += 3
-			print("Everyone:", player.name, "has", player.max_hand_size, "max hand size")
 			for i in xrange(player.max_hand_size):
 				player.hand.append(self.session.main_deck.draw())
-			print("Everyone:", player.name, "draws", player.max_hand_size, "cards")
-			print(player.name + ": Your hand:", player.hand)
+			self.session.history.append(player.hand[:])
 
 # play the turns
 class PlayTurns(GameState):
