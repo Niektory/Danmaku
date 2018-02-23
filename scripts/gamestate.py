@@ -114,8 +114,8 @@ class DealHands(GameState):
 		self.session.state.pop()
 		for player in self.session.players:
 			for i in xrange(player.max_hand_size):
-				player.hand.append(self.session.main_deck.draw())
-			self.session.history.append(player.hand[:])
+				player.hand.deck.append(self.session.main_deck.draw())
+			self.session.history.append(player.hand.deck[:])
 
 # play the turns
 class PlayTurns(GameState):
@@ -150,7 +150,7 @@ class DrawStep(GameState):
 		drawn_cards = []
 		for i in xrange(2):
 			drawn_cards.append(self.session.main_deck.draw())
-		self.session.current_player.hand.extend(drawn_cards)
+		self.session.current_player.hand.deck.extend(drawn_cards)
 		self.session.history.append(drawn_cards)
 		self.session.state.pop()
 
@@ -165,10 +165,11 @@ class MainStep(GameState):
 	def playerInput(self, name, message):
 		if name != self.session.current_player.name:
 			return
-		if message in self.session.current_player.hand:
+		card = self.session.current_player.hand.findCard(message)
+		if card:
 			self.session.history.append(message)
-			self.session.current_player.hand.remove(message)
-			self.session.discard_pile.deck.append(message)
+			self.session.current_player.hand.deck.remove(card)
+			self.session.discard_pile.deck.append(card)
 		elif message == "pass":
 			self.session.history.append(message)
 			self.session.state.pop()
@@ -183,18 +184,19 @@ class PreDiscardStep(GameState):
 class DiscardStep(GameState):
 	def run(self):
 		for player in self.session.active_players:
-			if len(player.hand) > player.max_hand_size:
+			if len(player.hand.deck) > player.max_hand_size:
 				return
 		self.session.state.pop()
 
 	def playerInput(self, name, message):
 		player = self.session.findPlayer(name)
-		if len(player.hand) <= player.max_hand_size:
+		if len(player.hand.deck) <= player.max_hand_size:
 			return
-		if message in player.hand:
+		card = self.session.current_player.hand.findCard(message)
+		if card:
 			self.session.history.append((name, message))
-			player.hand.remove(message)
-			self.session.discard_pile.deck.append(message)
+			player.hand.deck.remove(card)
+			self.session.discard_pile.deck.append(card)
 
 # turn: end turn
 class EndTurn(GameState):

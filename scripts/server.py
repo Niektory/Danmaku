@@ -3,8 +3,6 @@
 
 from __future__ import print_function
 
-import socket
-
 from config import version
 from network import ServerConnections
 from gamesession import GameSession

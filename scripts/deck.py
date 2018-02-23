@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018 Tomasz "Niektóry" Turowski
 
-from __future__ import print_function
-
 import random
 
 class Deck(object):
@@ -15,3 +13,8 @@ class Deck(object):
 
 	def draw(self):
 		return self.deck.pop()
+
+	def findCard(self, to_find):
+		for card in self.deck:
+			if to_find == card.ID:
+				return card

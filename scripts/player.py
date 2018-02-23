@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Copyright 2018 Tomasz "Niektóry" Turowski
 
+from deck import Deck
+
 DEFAULT_LIFE = 4
 DEFAULT_HAND_SIZE = 4
 
@@ -10,7 +12,7 @@ class Player(object):
 		self.role = None
 		self.character = None
 		self.life = DEFAULT_LIFE
-		self.hand = []
+		self.hand = Deck()
 		self.defeated = False
 
 	@property
