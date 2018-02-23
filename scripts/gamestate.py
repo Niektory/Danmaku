@@ -19,7 +19,7 @@ class GameState(object):
 	def run(self):
 		pass
 
-	def playerInput(self, name, message):
+	def playerInput(self, player, message):
 		pass
 
 # game not started
@@ -67,7 +67,7 @@ class DealCharacters(GameState):
 			drawn_characters = []
 			for j in xrange(CHARACTERS_TO_DRAW):
 				drawn_characters.append(self.session.character_deck.draw())
-			dealt_characters[player.name] = drawn_characters
+			dealt_characters[player] = drawn_characters
 			self.session.history.append(drawn_characters)
 		state_choose = ChooseCharacters(self.session)
 		state_choose.init(dealt_characters)
@@ -87,9 +87,9 @@ class ChooseCharacters(GameState):
 		for player in self.session.players:
 			self.session.history.append(player.character)
 
-	def playerInput(self, name, message):
-		if message in self.dealt_characters[name]:
-			self.session.findPlayer(name).character = message
+	def playerInput(self, player, message):
+		if message in self.dealt_characters[player]:
+			player.character = message
 
 # reveal the heroine to all players
 class RevealHeroine(GameState):
@@ -162,8 +162,8 @@ class PreMainStep(GameState):
 
 # turn: main step
 class MainStep(GameState):
-	def playerInput(self, name, message):
-		if name != self.session.current_player.name:
+	def playerInput(self, player, message):
+		if player != self.session.current_player:
 			return
 		card = self.session.current_player.hand.findCard(message)
 		if card:
@@ -188,13 +188,12 @@ class DiscardStep(GameState):
 				return
 		self.session.state.pop()
 
-	def playerInput(self, name, message):
-		player = self.session.findPlayer(name)
+	def playerInput(self, player, message):
 		if len(player.hand.deck) <= player.max_hand_size:
 			return
 		card = self.session.current_player.hand.findCard(message)
 		if card:
-			self.session.history.append((name, message))
+			self.session.history.append((player.name, message))
 			player.hand.deck.remove(card)
 			self.session.discard_pile.deck.append(card)
 

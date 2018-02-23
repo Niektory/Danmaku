@@ -68,4 +68,4 @@ class GameSession(object):
 		self.state[-1].run()
 
 	def playerInput(self, name, message):
-		self.state[-1].playerInput(name, message)
+		self.state[-1].playerInput(self.findPlayer(name), message)
