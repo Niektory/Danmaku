@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+import copy
+
 from deck import Deck
 
 class MainDeck(Deck):
@@ -27,6 +29,27 @@ class MainDeck(Deck):
 
 
 class MainDeckCard(object):
+	Action = None
+	Reaction = None
+	Item = None
+	danmaku = False
+
+
+class ActionBase(object):
+	@staticmethod
+	def conditionsSatisfied(state):
+		return False
+
+	@staticmethod
+	def illegalPlay(state):
+		return False
+
+	@staticmethod
+	def payCosts(state):
+		pass
+
+
+class ItemBase(object):
 	pass
 
 
@@ -154,10 +177,36 @@ class SealAway(MainDeckCard):
 class Shoot(MainDeckCard):
 	ID = "shoot"
 	name = "Shoot"
+	danmaku = True
 	# danmaku
 	# action [discard any number of danmaku cards]
 	#     [target player in range (extended by discarded cards)]
 	# > attack [that player]
+
+	class Action(ActionBase):
+		@staticmethod
+		def conditionsSatisfied(state):
+			target = state.session.findPlayer(state.message.split(":")[0])
+			# check if target is another player
+			if not target or target == state.player:
+				return False
+			temp_hand = copy.deepcopy(state.player.hand)
+			# check if all the cards to discard are in hand and of danmaku type
+			for to_discard in state.message.split(":")[1:]:
+				card = temp_hand.findCard(to_discard)
+				if not card or not card.danmaku:
+					return False
+				temp_hand.deck.remove(card)
+			# check if in range (modified by number of discarded cards)
+			if state.session.distance(state.player, target) \
+					<= state.player.range + state.message.count(":"):
+				return True
+			return False
+
+		@staticmethod
+		def payCosts(state):
+			for to_discard in state.message.split(":")[1:]:
+				state.player.hand.deck.remove(state.player.hand.findCard(to_discard))
 
 class SorcerersSutraScroll(MainDeckCard):
 	ID = "sorcerers sutra scroll"

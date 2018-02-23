@@ -36,16 +36,16 @@ class GameSession(object):
 		return [player for player in self.players if not player.defeated]
 
 	def distance(self, player1, player2):
-		i = player1
+		i = self.players.index(player1)
 		dist1 = 0
-		while i % len(self.players) != player2:
+		while i % len(self.players) != self.players.index(player2):
 			i += 1
 			if not self.players[i % len(self.players)].defeated:
 				dist1 += 1
 
-		i = player2
+		i = self.players.index(player2)
 		dist2 = 0
-		while i % len(self.players) != player1:
+		while i % len(self.players) != self.players.index(player1):
 			i += 1
 			if not self.players[i % len(self.players)].defeated:
 				dist2 += 1

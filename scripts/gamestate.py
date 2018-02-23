@@ -166,10 +166,11 @@ class MainStep(GameState):
 		if player != self.session.current_player:
 			return
 		card = self.session.current_player.hand.findCard(message)
-		if card:
+		if card and card.Action:
 			self.session.history.append(message)
-			self.session.current_player.hand.deck.remove(card)
-			self.session.discard_pile.deck.append(card)
+			state_play_card = PlayFromHand(self.session)
+			state_play_card.init(player, card, card.Action)
+			self.session.state.append(state_play_card)
 		elif message == "pass":
 			self.session.history.append(message)
 			self.session.state.pop()
@@ -207,3 +208,38 @@ class EndTurn(GameState):
 				= (self.session.current_player_i + 1) % len(self.session.players)
 			if not self.session.current_player.defeated:
 				break
+
+# play a card from hand: check conditions and collect targets
+class PlayFromHand(GameState):
+	def init(self, player, card, played_action):
+		self.player = player
+		self.card = card
+		self.played_action = played_action
+		self.message = ""
+		self.player.hand.deck.remove(card)
+
+	def abort(self):
+		self.player.hand.deck.append(self.card)
+		self.session.state.pop()
+		self.session.history.append("abort playing card")
+
+	def run(self):
+		# if conditions to play satisfied: pay the costs and put the card into play
+		if self.played_action.conditionsSatisfied(self):
+			self.session.state.pop()
+			self.played_action.payCosts(self)
+			# TODO: put the card on the stack and put it on discard pile there
+			self.session.discard_pile.deck.append(self.card)	#temp
+			self.session.history.append("card put into play")
+		# if cannot be played: return the card to hand
+		elif self.played_action.illegalPlay(self):
+			self.abort()
+
+	def playerInput(self, player, message):
+		if player != self.player:
+			return
+		if message == "abort":
+			self.abort()
+		else:
+			# collect targets
+			self.message = message

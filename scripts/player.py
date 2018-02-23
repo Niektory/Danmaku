@@ -5,6 +5,7 @@ from deck import Deck
 
 DEFAULT_LIFE = 4
 DEFAULT_HAND_SIZE = 4
+DEFAULT_RANGE = 1
 
 class Player(object):
 	def __init__(self, name):
@@ -22,3 +23,7 @@ class Player(object):
 	@property
 	def max_hand_size(self):
 		return DEFAULT_HAND_SIZE
+
+	@property
+	def range(self):
+		return DEFAULT_RANGE
