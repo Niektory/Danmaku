@@ -187,8 +187,8 @@ class Shoot(MainDeckCard):
 		@staticmethod
 		def conditionsSatisfied(state):
 			target = state.session.findPlayer(state.message.split(":")[0])
-			# check if target is another player
-			if not target or target == state.player:
+			# check if target is another active player
+			if not target or target == state.player or target.defeated:
 				return False
 			temp_hand = copy.deepcopy(state.player.hand)
 			# check if all the cards to discard are in hand and of danmaku type
@@ -199,14 +199,19 @@ class Shoot(MainDeckCard):
 				temp_hand.deck.remove(card)
 			# check if in range (modified by number of discarded cards)
 			if state.session.distance(state.player, target) \
-					<= state.player.range + state.message.count(":"):
-				return True
-			return False
+					> state.player.range + state.message.count(":"):
+				return False
+			state.targets = target
+			return True
 
 		@staticmethod
 		def payCosts(state):
 			for to_discard in state.message.split(":")[1:]:
 				state.player.hand.deck.remove(state.player.hand.findCard(to_discard))
+
+		@staticmethod
+		def execute(state):
+			state.targets.life -= 1
 
 class SorcerersSutraScroll(MainDeckCard):
 	ID = "sorcerers sutra scroll"

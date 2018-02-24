@@ -23,7 +23,7 @@ class Server(object):
 				# list the players
 				if message == "players":
 					for player in game_session.players:
-						connections.message(user, player.name)
+						connections.message(user, "{} ({} life)".format(player.name, player.life))
 				# join the game as player
 				elif message == "join":
 					if game_session.addPlayer(user):
@@ -36,6 +36,10 @@ class Server(object):
 				# perform a game action
 				elif message.startswith("act:"):
 					game_session.playerInput(user, message.split(":",1)[1])
+				# list the cards in hand
+				elif message == "hand":
+					if game_session.findPlayer(user):
+						connections.message(user, game_session.findPlayer(user).hand.deck)
 
 				game_session.run()
 				while history_processed < len(game_session.history):

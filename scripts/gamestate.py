@@ -216,6 +216,7 @@ class PlayFromHand(GameState):
 		self.card = card
 		self.played_action = played_action
 		self.message = ""
+		self.targets = None
 		self.player.hand.deck.remove(card)
 
 	def abort(self):
@@ -228,9 +229,11 @@ class PlayFromHand(GameState):
 		if self.played_action.conditionsSatisfied(self):
 			self.session.state.pop()
 			self.played_action.payCosts(self)
-			# TODO: put the card on the stack and put it on discard pile there
-			self.session.discard_pile.deck.append(self.card)	#temp
 			self.session.history.append("card put into play")
+			self.session.history.append(self.message)
+			state_card_played = CardPlayed(self.session)
+			state_card_played.init(self.player, self.card, self.played_action, self.targets)
+			self.session.state.append(state_card_played)
 		# if cannot be played: return the card to hand
 		elif self.played_action.illegalPlay(self):
 			self.abort()
@@ -243,3 +246,18 @@ class PlayFromHand(GameState):
 		else:
 			# collect targets
 			self.message = message
+
+# execute card effects
+class CardPlayed(GameState):
+	def init(self, player, card, played_action, targets):
+		self.player = player
+		self.card = card
+		self.played_action = played_action
+		self.targets = targets
+
+	def run(self):
+		self.session.history.append("execute card effect")
+		self.session.history.append(self.targets)
+		self.played_action.execute(self)
+		self.session.discard_pile.deck.append(self.card)
+		self.session.state.pop()
